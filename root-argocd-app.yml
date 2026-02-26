@@ -10,7 +10,7 @@ spec:
     targetRevision: HEAD
     path: appsets
   destination:
-    server: https://kubernetes.default.svc
+    name: in-cluster
     namespace: argocd
   syncPolicy:
     syncOptions:
