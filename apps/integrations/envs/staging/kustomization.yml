@@ -11,4 +11,4 @@ patches:
   patch: |-
     - op: replace
       path: /metadata/namespace
-      value: orders-staging
+      value: integrations-staging

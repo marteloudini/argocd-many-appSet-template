@@ -11,4 +11,4 @@ patches:
   patch: |-
     - op: replace
       path: /metadata/namespace
-      value: orders-prod-us
+      value: integrations-prod-us
