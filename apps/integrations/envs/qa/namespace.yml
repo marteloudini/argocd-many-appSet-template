@@ -1,0 +1,5 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: my-integration
+  namespace: orders-qa
