@@ -5,7 +5,10 @@ resources:
 - ../../base
 
 patches:
-- path: namespace.yml
-  target:
+- target:
     name: my-integration
     kind: Integration
+  patch: |-
+    - op: replace
+      path: /metadata/namespace
+      value: orders-staging

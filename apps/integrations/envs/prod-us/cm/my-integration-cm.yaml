@@ -1,9 +1,0 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: my-integration-prop
-  namespace: orders-prod-us
-immutable: false
-data:
-  application.properties: |
-    prop.application.name=Mon application of martel2 production US

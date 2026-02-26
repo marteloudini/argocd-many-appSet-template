@@ -3,3 +3,12 @@ kind: Kustomization
 
 resources:
 - ../../base
+
+patches:
+- target:
+    name: my-integration
+    kind: Integration
+  patch: |-
+    - op: replace
+      path: /metadata/namespace
+      value: orders-prod-us

@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
 - integration_a.yml
-- cm/my-integration-cm.yaml
