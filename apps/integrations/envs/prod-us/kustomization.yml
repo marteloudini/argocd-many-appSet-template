@@ -5,7 +5,7 @@ resources:
 - ../../base
 
 patches:
-- path: namespace.yaml
+- path: namespace.yml
   target:
     name: my-integration
     kind: Integration
