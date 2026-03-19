@@ -20,7 +20,7 @@ spec:
 
       - to: "kafka:pdf.completed?brokers={{kafka.brokers}}"
 
-      on-exception:
+      onException:
         exception:
         - java.lang.Exception
         handled: true

@@ -38,7 +38,7 @@ spec:
       - to: "kafka:pdf.received?brokers={{kafka.brokers}}"
       - to: "direct:observability"
 
-      on-exception:
+      onException:
         exception:
         - java.lang.Exception
         handled: true
