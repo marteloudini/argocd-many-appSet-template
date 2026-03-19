@@ -4,6 +4,8 @@ metadata:
   name: sftp-to-kafka
   namespace: pdf-integration
 spec:
+  dependencies:
+    - camel:prometheus
   flows:
   - from:
       uri: "sftp://{{sftp.host}}:{{sftp.port}}/{{sftp.in.dir}}"

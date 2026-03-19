@@ -17,6 +17,7 @@ spec:
         base-path: /api
 
   dependencies:
+  - camel:prometheus
   - camel:mail
   - camel:sftp
   - camel:http
