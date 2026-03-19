@@ -6,14 +6,13 @@ resources:
 
 patches:
 - target:
-    name: pdf-integration
     kind: Integration
   patch: |-
     - op: replace
       path: /metadata/namespace
       value: pdf-integration-staging
 - target:
-    name: pdf-integration
+    name: camel-config
     kind: ConfigMap
   patch: |-
     - op: replace
