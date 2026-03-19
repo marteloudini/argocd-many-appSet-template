@@ -20,3 +20,6 @@ data:
     camel.datasource.url=jdbc:postgresql://10.96.249.138:5432/defaultdb
     camel.datasource.username=admin
     camel.datasource.password=123456
+
+    # Quarkus
+    quarkus.log.level=INFO
