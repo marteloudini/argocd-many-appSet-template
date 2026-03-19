@@ -1,0 +1,28 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: sign-service
+  namespace: pdf-integration
+spec:
+  flows:
+  - from:
+      uri: "kafka:pdf.received?brokers={{kafka.brokers}}"
+      steps:
+      - log: "Signature document ${body}"
+
+      - set-header:
+          name: CamelHttpMethod
+          constant: POST
+
+      - to: "http://signdocument-service/sign"
+
+      - log: "Document signé"
+
+      - to: "kafka:pdf.signed?brokers={{kafka.brokers}}"
+
+      on-exception:
+        exception:
+        - java.lang.Exception
+        handled: true
+        steps:
+        - to: "kafka:pdf.error?brokers={{kafka.brokers}}"

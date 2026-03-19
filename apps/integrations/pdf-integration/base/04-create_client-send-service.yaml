@@ -1,0 +1,28 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: client-send-service
+  namespace: pdf-integration
+spec:
+  flows:
+  - from:
+      uri: "kafka:pdf.signed?brokers={{kafka.brokers}}"
+      steps:
+      - log: "Envoi au client"
+
+      - set-header:
+          name: CamelHttpMethod
+          constant: POST
+
+      - toD: "http://clientsend-service/send/${body.clientId}"
+
+      - log: "Document envoyé"
+
+      - to: "kafka:pdf.completed?brokers={{kafka.brokers}}"
+
+      on-exception:
+        exception:
+        - java.lang.Exception
+        handled: true
+        steps:
+        - to: "kafka:pdf.error?brokers={{kafka.brokers}}"

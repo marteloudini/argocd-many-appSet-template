@@ -1,0 +1,108 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+    name: signdocument-service
+    namespace: pdf-integration
+spec:
+    traits:
+        service:
+            enabled: true
+            type: ClusterIP
+            port: 8080
+        prometheus:
+            enabled: true
+        platform-http:
+            open-api:
+                enabled: true
+                base-path: /api
+
+    dependencies:
+      - mvn:org.apache.pdfbox:pdfbox:3.0.7
+      - mvn:bouncycastle:bcpkix-jdk18on:1.83
+      - mvn:bouncycastle:bcprov-jdk18on:1.83
+
+    flows:
+      - from:
+            uri: "platform-http:/sign"
+            steps:
+              - log: "Reçu document pour signature"
+
+              # Validation PDF
+              - process:
+                    ref: "validatePdf"
+
+              # Signature PKCS#7
+              - process:
+                    ref: "signPdf"
+
+              - set-header:
+                    name: Content-Type
+                    constant: application/pdf
+
+              - log: "Document signé"
+
+              - to: "direct:observability"
+
+      - from:
+        uri: "direct:observability"
+        steps:
+          - set-header:
+                name: CamelPrometheusMetricsName
+                constant: "pdf_integration_signdocument_total"
+          - to: "prometheus:counter"
+
+# Traitement PDF
+beans:
+  - name: validatePdf
+    type: class
+    class: |
+        import org.apache.camel.Exchange;
+        import org.apache.camel.Processor;
+        import org.apache.pdfbox.pdmodel.PDDocument;
+        import java.io.InputStream;
+
+        public class validatePdf implements Processor {
+            public void process(Exchange exchange) throws Exception {
+                InputStream is = exchange.getIn().getBody(InputStream.class);
+                PDDocument pdf = PDDocument.load(is);
+                if(pdf.getNumberOfPages() == 0){
+                    throw new Exception("PDF vide");
+                }
+                pdf.close();
+            }
+        }
+
+  - name: signPdf
+    type: class
+    class: |
+        import org.apache.camel.Exchange;
+        import org.apache.camel.Processor;
+        import java.security.KeyStore;
+        import java.security.PrivateKey;
+        import java.security.cert.Certificate;
+        import org.bouncycastle.cms.CMSSignedDataGenerator;
+        import org.bouncycastle.cms.CMSTypedData;
+        import org.bouncycastle.cms.CMSProcessableByteArray;
+
+        public class signPdf implements Processor {
+            public void process(Exchange exchange) throws Exception {
+                byte[] pdfBytes = exchange.getIn().getBody(byte[].class);
+
+                // Charger keystore
+                KeyStore ks = KeyStore.getInstance("PKCS12");
+                ks.load(getClass().getResourceAsStream("/certificat.p12"), "motdepasse".toCharArray());
+                String alias = ks.aliases().nextElement();
+                PrivateKey key = (PrivateKey) ks.getKey(alias, "motdepasse".toCharArray());
+                Certificate cert = ks.getCertificate(alias);
+
+                CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+                gen.addSignerInfoGenerator(
+                    org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder
+                        .fromKey(key, cert)
+                );
+                CMSTypedData data = new CMSProcessableByteArray(pdfBytes);
+                byte[] signed = gen.generate(data, true).getEncoded();
+
+                exchange.getIn().setBody(signed);
+            }
+        }

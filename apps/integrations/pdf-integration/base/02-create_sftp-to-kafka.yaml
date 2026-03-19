@@ -1,0 +1,51 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: sftp-to-kafka
+  namespace: pdf-integration
+spec:
+  flows:
+  - from:
+      uri: "sftp://{{sftp.host}}:{{sftp.port}}/{{sftp.in.dir}}"
+      parameters:
+        username: "{{sftp.username}}"
+        password: "{{sftp.password}}"
+        delete: true
+        readLock: changed
+      steps:
+      - log: "Fichier reçu : ${header.CamelFileName}"
+
+      # Metadata
+      - set-property:
+          name: clientId
+          simple: "${header.CamelFileName.split('_')[0]}"
+      - set-property:
+          name: documentId
+          simple: "${header.CamelFileName.split('_')[1]}"
+
+      # Message Kafka (JSON)
+      - set-body:
+          simple: |
+            {
+              "fileName": "${header.CamelFileName}",
+              "clientId": "${exchangeProperty.clientId}",
+              "documentId": "${exchangeProperty.documentId}",
+              "content": "${bodyAs(String)}"
+            }
+
+      - to: "kafka:pdf.received?brokers={{kafka.brokers}}"
+
+      on-exception:
+        exception:
+        - java.lang.Exception
+        handled: true
+        steps:
+        - to: "kafka:pdf.error?brokers={{kafka.brokers}}"
+
+  - from:
+      uri: "direct:observability"
+      steps:
+      - set-header:
+          name: CamelPrometheusMetricsName
+          constant: "pdf_integration_sftp_received_total"
+      - to: "prometheus:counter"

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: camel-config
+  namespace: pdf-integration
+data:
+  application.properties: |
+    # SFTP
+    sftp.host=sftp-service
+    sftp.port=22
+    sftp.username=user
+    sftp.password=pass
+    sftp.in.dir=/input
+    sftp.error.dir=/error
+
+    # Kafka
+    kafka.brokers=my-cluster-kafka-bootstrap:9092
+
+    # Database
+    camel.datasource.url=jdbc:postgresql://10.96.249.138:5432/defaultdb
+    camel.datasource.username=admin
+    camel.datasource.password=123456
