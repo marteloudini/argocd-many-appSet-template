@@ -50,7 +50,7 @@ spec:
           - set-header:
                 name: CamelPrometheusMetricsName
                 constant: "pdf_integration_signdocument_total"
-          - to: "prometheus:counter"
+          - to: "prometheus:counter:pdf_integration_signdocument_total"
 
 # Traitement PDF
 beans:

@@ -60,4 +60,4 @@ spec:
     - set-header:
         name: CamelPrometheusMetricsName
         constant: "pdf_integration_clientsend_total"
-    - to: "prometheus:counter"
+    - to: "prometheus:counter:pdf_integration_clientsend_total"

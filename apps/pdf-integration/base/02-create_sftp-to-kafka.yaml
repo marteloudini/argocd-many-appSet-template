@@ -5,7 +5,7 @@ metadata:
   namespace: pdf-integration
 spec:
   dependencies:
-    - camel:prometheus
+  - camel:prometheus
   flows:
   - from:
       uri: "sftp://{{sftp.host}}:{{sftp.port}}/{{sftp.in.dir}}"
@@ -36,6 +36,7 @@ spec:
             }
 
       - to: "kafka:pdf.received?brokers={{kafka.brokers}}"
+      - to: "direct:observability"
 
       on-exception:
         exception:
@@ -50,4 +51,4 @@ spec:
       - set-header:
           name: CamelPrometheusMetricsName
           constant: "pdf_integration_sftp_received_total"
-      - to: "prometheus:counter"
+      - to: "prometheus:counter:pdf_integration_sftp_received_total"
