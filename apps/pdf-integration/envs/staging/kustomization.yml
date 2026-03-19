@@ -11,4 +11,11 @@ patches:
   patch: |-
     - op: replace
       path: /metadata/namespace
-      value: integrations-staging
+      value: pdf-integration-staging
+- target:
+    name: pdf-integration
+    kind: ConfigMap
+  patch: |-
+    - op: replace
+      path: /metadata/namespace
+      value: pdf-integration-staging
